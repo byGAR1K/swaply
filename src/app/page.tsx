@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import GiftsGallery from '../app/GiftsGallery';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("Telegram");
