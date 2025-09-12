@@ -1,8 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+
+// Компонент кнопки Telegram
+function TelegramButton() {
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = "https://telegram.org/js/telegram-widget.js?7";
+    script.async = true;
+    script.setAttribute("data-telegram-login", "@SantaExchange_bot"); // ваш бот
+    script.setAttribute("data-size", "large");
+    script.setAttribute("data-userpic", "true");
+    script.setAttribute("data-request-access", "write");
+    script.setAttribute("data-auth-url", "https://swaply-txjc.vercel.app//api/telegram-auth");
+
+    const container = document.getElementById('telegram-button');
+    if (container) container.appendChild(script);
+
+    return () => {
+      if (container) container.innerHTML = "";
+    };
+  }, []);
+
+  return null;
+}
 export default function Home() {
   const [activeTab, setActiveTab] = useState("Telegram");
   const [activeGiftFilter, setActiveGiftFilter] = useState("Все");
@@ -87,6 +110,10 @@ export default function Home() {
                 быстро -{" "}
                 <span className="inline-block text-center w-full md:w-auto">KYC</span>
               </h2>
+            {/* Здесь вставляем кнопку Telegram Wallet / Login */}
+            {/* Контейнер для кнопки */}
+            <div className="mt-6" id="telegram-button"></div>
+              <TelegramButton />
             </section>
 
             <section className="max-w-5xl mx-auto bg-[#2C3E50] border border-gray-600 rounded-3xl shadow-lg p-6 mt-5 mb-12 flex flex-col md:flex-row items-center gap-6">
