@@ -2,100 +2,57 @@
 
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import gifts from "@/data/gifts.json";
 
 
-// Компонент кнопки Telegram
-function TelegramButton() {
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = "https://telegram.org/js/telegram-widget.js?7";
-    script.async = true;
-    script.setAttribute("data-telegram-login", "@SantaExchange_bot"); // ваш бот
-    script.setAttribute("data-size", "large");
-    script.setAttribute("data-userpic", "true");
-    script.setAttribute("data-request-access", "write");
-    script.setAttribute("data-auth-url", "https://swaply-txjc.vercel.app/api/telegram-auth");
-
-    const container = document.getElementById('telegram-button');
-    if (container) container.appendChild(script);
-
-    return () => {
-      if (container) container.innerHTML = "";
-    };
-  }, []);
-
-  return null;
-}
 export default function Home() {
   const [activeTab, setActiveTab] = useState("Telegram");
   const [activeGiftFilter, setActiveGiftFilter] = useState("Все");
-  
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark'); // состояние темы
+  // Определяем тип подарка
+  type Gift = {
+    name: string;
+    desc: string;
+    type: string;
+    image: string;
+    link?: string;
+    price?: number; // если у тебя есть цена
+  };
+
+  // Используем тип в useState
+  const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
   // Фильтры для вкладки Gifts
   const giftFilters = ["Все", "Популярные", "Редкие", "Новые", "Акционные"];
   
-  // Пример подарков с Fragment JSON-метаданными
-  const gifts = [
-    {
-      name: "🎁 Desk Calendar #171000",
-      desc: "Эксклюзивная коллекция NFT Desk Calendars от Telegram.",
-      type: "Популярные",
-      image: "https://nft.fragment.com/collection/deskcalendar.webp",
-      link: "https://fragment.com/gifts/deskcalendar"
-    },
-    {
-      name: "Heart Locket #875",
-      desc: "Эксклюзивный Heart Locket с уникальным дизайном.",
-      type: "Редкие",
-      image: "https://nft.fragment.com/gift/heartlocket-875.webp",
-      link: "#"
-    },
-    {
-      name: "💎 Подарок 3",
-      desc: "Описание подарка",
-      type: "Новые",
-      image: "https://media.tenor.com/XeoIkKG0G2kAAAAi/%D1%83%D1%82%D0%B5%D0%BD%D0%BE%D0%BA.gif",
-      link: "#"
-    },
-    {
-      name: "🚀 Подарок 4",
-      desc: "Описание подарка",
-      type: "Популярные",
-      image: "https://media.tenor.com/XeoIkKG0G2kAAAAi/%D1%83%D1%82%D0%B5%D0%BD%D0%BE%D0%BA.gif",
-      link: "#"
-    },
-    {
-      name: "🛡 Подарок 5",
-      desc: "Описание подарка",
-      type: "Акционные",
-      image: "https://media.tenor.com/XeoIkKG0G2kAAAAi/%D1%83%D1%82%D0%B5%D0%BD%D0%BE%D0%BA.gif",
-      link: "#"
-    },
-    {
-      name: "⚡ Подарок 6",
-      desc: "Описание подарка",
-      type: "Редкие",
-      image: "https://media.tenor.com/XeoIkKG0G2kAAAAi/%D1%83%D1%82%D0%B5%D0%BD%D0%BE%D0%BA.gif",
-      link: "#"
-    },
-  ];
-  const nftGifts = [
-    {
-      name: "Heart Locket #952",
-      desc: "An exclusive Heart Locket with the appearance Toy Joy on a Midnight Blue background with Coat of Arms icons.",
-      type: "Редкие",
-      image: "https://nft.fragment.com/gift/heartlocket-952.webp",
-      lottie: "https://nft.fragment.com/gift/heartlocket-952.lottie.json",
-      link: "#",
-      collection: "Heart Lockets",
-      owner: "gift-minter.ton"
-    }
-  ];
   const tabVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -20 },
   };
-
+  useEffect(() => {
+    if (selectedGift) {
+      // Запрещаем прокрутку
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Разрешаем прокрутку
+      document.body.style.overflow = 'auto';
+    }
+  
+    // Очистка эффекта при размонтировании
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [selectedGift]);
+  
+  // Включение класса на body при смене темы
+  useEffect(() => {
+    document.body.className = theme === 'dark' 
+      ? 'bg-[#1E293B] text-white font-sans' 
+      : 'bg-white text-gray-900 font-sans';
+  }, [theme]);
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
   const renderTabContent = () => {
     switch (activeTab) {
       case "Telegram":
@@ -110,10 +67,6 @@ export default function Home() {
                 быстро -{" "}
                 <span className="inline-block text-center w-full md:w-auto">KYC</span>
               </h2>
-            {/* Здесь вставляем кнопку Telegram Wallet / Login */}
-            {/* Контейнер для кнопки */}
-            <div className="mt-6" id="telegram-button"></div>
-              <TelegramButton />
             </section>
 
             <section className="max-w-5xl mx-auto bg-[#2C3E50] border border-gray-600 rounded-3xl shadow-lg p-6 mt-5 mb-12 flex flex-col md:flex-row items-center gap-6">
@@ -235,10 +188,10 @@ export default function Home() {
           (g) => activeGiftFilter === "Все" || g.type === activeGiftFilter
         );
 
-        return (
-          <section className="max-w-6xl mx-auto py-8 px-4 flex flex-col md:flex-row gap-4 md:gap-6">
+        return (  
+          <section className="max-w-6xl mx-auto py-8 px-4 flex flex-col md:flex-row items-start gap-4 md:gap-6">
             {/* Блок фильтров */}
-            <div className="w-full md:w-1/4 bg-[#2C3E50] p-3 md:p-6 rounded-3xl shadow-lg flex flex-row md:flex-col gap-2 md:gap-3 overflow-x-auto scrollbar-hide">
+            <div className="w-full md:w-1/4 bg-[#2C3E50] p-3 md:p-6 rounded-3xl shadow-lg flex flex-row md:flex-col gap-2 md:gap-3 overflow-x-auto scrollbar-hide h-fit">
               {giftFilters.map((filter) => (
                 <button
                   key={filter}
@@ -256,34 +209,47 @@ export default function Home() {
 
             {/* Блок сетки подарков */}
             <div className="w-full md:w-3/4 bg-[#2C3E50] p-3 md:p-6 rounded-3xl shadow-lg">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                {filteredGifts.map((gift, i) => (
-                  <div
-                    key={i}
-                    className="bg-[#1E293B] p-4 md:p-6 rounded-2xl shadow-md flex flex-col items-center justify-center hover:scale-105 transition"
-                  >
-                    <img
-                      src={gift.image}
-                      alt={gift.name}
-                      className="w-32 h-32 md:w-40 md:h-40 object-contain rounded-lg mb-3"
-                    />
-                    <h3 className="text-sm md:text-base font-semibold text-center mb-2">{gift.name}</h3>
-                    <p className="text-gray-300 text-xs md:text-sm text-center mb-2">{gift.desc}</p>
-                    {gift.link && (
-                      <a
-                        href={gift.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:underline text-xs md:text-sm"
-                      >
-                        Подробнее
-                      </a>
-                    )}
-                  </div>
-                ))}
-              </div>
+              {filteredGifts.length === 0 ? (
+                <p className="text-gray-400 text-center py-10 text-lg">
+                  😢 Информация про подарки отсутствует
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                  {filteredGifts.map((gift, i) => (
+                    <div
+                      key={i}
+                      onClick={() => setSelectedGift(gift)} // открытие модалки
+                      className="bg-[#1E293B] p-4 md:p-6 rounded-2xl shadow-md flex flex-col items-center justify-center hover:scale-105 transition cursor-pointer"
+                    >
+                      <img
+                        src={gift.image}
+                        alt={gift.name}
+                        className="w-32 h-32 md:w-40 md:h-40 object-contain rounded-lg mb-3"
+                      />
+                      <h3 className="text-sm md:text-base font-semibold text-center mb-2">
+                        {gift.name}
+                      </h3>
+                      <p className="text-gray-300 text-xs md:text-sm text-center mb-2">
+                        {gift.desc}
+                      </p>
+                      {gift.link && (
+                        <a
+                          href={gift.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:underline text-xs md:text-sm"
+                        >
+                          Подробнее
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
+
           </section>
+
         );
 
       default:
@@ -319,7 +285,59 @@ export default function Home() {
           </nav>
         </div>
       </header>
+      {/* Модальное окно */}
+      <AnimatePresence>
+        {selectedGift && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="bg-[#2C3E50] rounded-3xl shadow-xl max-w-md w-full p-6 relative"
+            >
+              {/* Кнопка закрытия */}
+              <button
+                onClick={() => setSelectedGift(null)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl font-bold"
+              >
+                &times;
+              </button>
 
+              {/* Изображение подарка */}
+              <img
+                src={selectedGift.image}
+                alt={selectedGift.name}
+                className="w-48 h-48 mx-auto rounded-lg mb-4 object-contain"
+              />
+
+              {/* Название и описание */}
+              <h3 className="text-2xl font-bold text-center mb-2">{selectedGift.name}</h3>
+              <p className="text-gray-300 text-center mb-4">{selectedGift.desc}</p>
+
+              {/* Цена */}
+              {selectedGift.price && (
+                <div className="flex items-center justify-center gap-2 text-lg font-semibold text-blue-400 mb-4">
+                  <img src="/ton-icon.png" alt="TON" className="w-5 h-5" />
+                  {selectedGift.price} TON
+                </div>
+              )}
+
+              {/* Кнопка Купить */}
+              <button
+                onClick={() => alert(`Вы купили ${selectedGift.name}!`)}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
+              >
+                Купить
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>         
       {/* Контент */}
       <div className="flex-grow">
         <AnimatePresence mode="wait">

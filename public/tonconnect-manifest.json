@@ -1,0 +1,6 @@
+{
+    "name": "Swaply",
+    "description": "Подключите ваш TON кошелек для Swaply",
+    "icons": ["https://media.tenor.com/-UVdGp9pWrAAAAAi/utya-telegram.gif"],
+    "url": "http://localhost:3000/tonconnect-manifest.json"
+  }
