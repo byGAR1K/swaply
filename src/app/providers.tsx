@@ -1,10 +1,9 @@
-// src/app/providers.tsx
 'use client';
 
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = 'https://swaply-9wv3.vercel.app';
 
   return (
     <TonConnectUIProvider

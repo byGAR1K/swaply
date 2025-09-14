@@ -1,14 +1,5 @@
 {
-  "name": "Swaply",
-  "description": "Подключите ваш TON кошелек для Swaply",
-  "icons": [
-    {
-      "src": "/utya-telegram.gif",
-      "sizes": "128x128",
-      "type": "image/gif"
-    }
-  ],
-  "start_url": "http://localhost:3000",
-  "theme_color": "#0F172A",
-  "display": "standalone"
+  "url": "https://swaply-9wv3.vercel.app/",
+  "name": "SWAPLY",
+  "iconUrl": "https://media.tenor.com/aL6LyuOT0VIAAAAi/telegram-utya-telegram-duck.gif"
 }
