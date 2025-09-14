@@ -4,11 +4,10 @@ import { useState, useEffect } from 'react';
 import { TonConnectButton, useTonConnect } from '@tonconnect/ui-react';
 
 export default function Header() {
-  const { account, disconnect } = useTonConnect();
+  const { account, connect, disconnect } = useTonConnect(); // подключаем connect
   const [menuOpen, setMenuOpen] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
 
-  // Получаем баланс сразу при подключении кошелька
   useEffect(() => {
     if (account?.address) {
       const fetchBalance = async () => {
@@ -35,13 +34,12 @@ export default function Header() {
       <div className="flex items-center gap-4 relative">
         {account?.address ? (
           <>
+            {/* СВОЙ блок вместо TonConnectButton */}
             <div
               onClick={() => setMenuOpen(!menuOpen)}
               className="cursor-pointer text-sm text-gray-200 px-3 py-1 rounded hover:bg-gray-700 transition flex flex-col items-end"
             >
-              <span>
-                {account.address.slice(0, 8)}...{account.address.slice(-6)}
-              </span>
+              <span>{account.address.slice(0, 8)}...{account.address.slice(-6)}</span>
               <span className="text-xs text-gray-400">{formattedBalance} TON</span>
             </div>
 
@@ -61,7 +59,13 @@ export default function Header() {
             )}
           </>
         ) : (
-          <TonConnectButton className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded" />
+          // Показываем кнопку подключения, если кошелька нет
+          <button
+            onClick={() => connect?.()}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded"
+          >
+            Подключить кошелек
+          </button>
         )}
       </div>
     </header>
