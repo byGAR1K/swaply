@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { TonConnectButton, useTonConnect } from '@tonconnect/ui-react';
+import { useTonConnect } from '@tonconnect/ui-react';
 
 export default function Header() {
-  const { account, connect, disconnect } = useTonConnect(); // подключаем connect
+  const { account, connect, disconnect } = useTonConnect();
   const [menuOpen, setMenuOpen] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
 
@@ -14,8 +14,7 @@ export default function Header() {
         try {
           const b = await account.getBalance?.();
           setBalance(b ? b / 1_000_000_000 : 0);
-        } catch (err) {
-          console.error('Ошибка получения баланса:', err);
+        } catch {
           setBalance(0);
         }
       };
@@ -28,13 +27,19 @@ export default function Header() {
   const formattedBalance = balance !== null ? balance.toFixed(2) : '...';
 
   return (
-    <header className="flex justify-between items-center p-4 shadow-md bg-[#0F172A] relative">
+    <header className="flex justify-between items-center p-4 shadow-md bg-[#0F172A]">
       <h1 className="text-2xl font-bold text-white">🚀 SWAPLY</h1>
 
-      <div className="flex items-center gap-4 relative">
-        {account?.address ? (
-          <>
-            {/* СВОЙ блок вместо TonConnectButton */}
+      <div className="flex items-center gap-4">
+        {!account?.address ? (
+          <button
+            onClick={() => connect?.()}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded"
+          >
+            Подключить кошелек
+          </button>
+        ) : (
+          <div className="relative">
             <div
               onClick={() => setMenuOpen(!menuOpen)}
               className="cursor-pointer text-sm text-gray-200 px-3 py-1 rounded hover:bg-gray-700 transition flex flex-col items-end"
@@ -44,12 +49,12 @@ export default function Header() {
             </div>
 
             {menuOpen && (
-              <div className="absolute right-0 top-16 bg-[#1F2A40] p-4 rounded shadow-md w-44 text-white z-50">
+              <div className="absolute right-0 top-12 bg-[#1F2A40] p-4 rounded shadow-md w-44 text-white z-50">
                 <div className="mb-2">Баланс: {formattedBalance} TON</div>
                 <button
                   className="w-full bg-red-500 hover:bg-red-600 text-white py-1 rounded"
                   onClick={() => {
-                    disconnect();
+                    disconnect?.();
                     setMenuOpen(false);
                   }}
                 >
@@ -57,15 +62,7 @@ export default function Header() {
                 </button>
               </div>
             )}
-          </>
-        ) : (
-          // Показываем кнопку подключения, если кошелька нет
-          <button
-            onClick={() => connect?.()}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded"
-          >
-            Подключить кошелек
-          </button>
+          </div>
         )}
       </div>
     </header>
