@@ -3,13 +3,16 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import gifts from "@/data/gifts.json";
+import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
 
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("Telegram");
   const [activeGiftFilter, setActiveGiftFilter] = useState("Все");
   const [theme, setTheme] = useState<'dark' | 'light'>('dark'); // состояние темы
-
+  
+  const [tonConnectUI] = useTonConnectUI();
+  const [account, setAccount] = useState<string | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -395,20 +398,27 @@ export default function Home() {
           </div>
 
           <nav className="overflow-x-auto scrollbar-hide ml-6 flex-1">
-            <div className="flex space-x-6 px-4 md:justify-center">
-              {["Telegram", "Premium", "Stars", "Gifts"].map((tab) => (
-                <span
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`cursor-pointer whitespace-nowrap pb-2 transition border-b-2 ${
-                    activeTab === tab
-                      ? "border-blue-400 text-white"
-                      : "border-transparent text-gray-300 hover:text-white"
-                  }`}
-                >
-                  {tab}
-                </span>
-              ))}
+            <div className="flex items-center justify-between">
+              <div className="flex space-x-6 px-4 md:justify-center">
+                {["Telegram", "Premium", "Stars", "Gifts"].map((tab) => (
+                  <span
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`cursor-pointer whitespace-nowrap pb-2 transition border-b-2 ${
+                      activeTab === tab
+                        ? "border-blue-400 text-white"
+                        : "border-transparent text-gray-300 hover:text-white"
+                    }`}
+                  >
+                    {tab}
+                  </span>
+                ))}
+              </div>
+
+              {/* TON Connect кнопка справа */}
+              <div className="ml-4">
+                <TonConnectButton />
+              </div>
             </div>
           </nav>
         </div>
