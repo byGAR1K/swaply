@@ -1,16 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TonConnectButton, useTonConnect } from '@tonconnect/ui-react';
 
 export default function Header() {
-  const { account, disconnect } = useTonConnect(); // account может быть undefined
+  const { account, disconnect } = useTonConnect();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [balance, setBalance] = useState<number | null>(null);
 
-  // Баланс в TON (если он есть в account.balance в наноTON)
-  const formattedBalance = account?.balance
-    ? (Number(account.balance) / 1_000_000_000).toFixed(2)
-    : '0';
+  // Получаем баланс сразу при подключении кошелька
+  useEffect(() => {
+    if (account?.address) {
+      const fetchBalance = async () => {
+        try {
+          const b = await account.getBalance?.();
+          setBalance(b ? b / 1_000_000_000 : 0);
+        } catch (err) {
+          console.error('Ошибка получения баланса:', err);
+          setBalance(0);
+        }
+      };
+      fetchBalance();
+    } else {
+      setBalance(null);
+    }
+  }, [account]);
+
+  const formattedBalance = balance !== null ? balance.toFixed(2) : '...';
 
   return (
     <header className="flex justify-between items-center p-4 shadow-md bg-[#0F172A] relative">
@@ -21,13 +37,16 @@ export default function Header() {
           <>
             <div
               onClick={() => setMenuOpen(!menuOpen)}
-              className="cursor-pointer text-sm text-gray-200 px-3 py-1 rounded hover:bg-gray-700 transition"
+              className="cursor-pointer text-sm text-gray-200 px-3 py-1 rounded hover:bg-gray-700 transition flex flex-col items-end"
             >
-              {account.address.slice(0, 8)}...{account.address.slice(-6)}
+              <span>
+                {account.address.slice(0, 8)}...{account.address.slice(-6)}
+              </span>
+              <span className="text-xs text-gray-400">{formattedBalance} TON</span>
             </div>
 
             {menuOpen && (
-              <div className="absolute right-0 top-10 bg-[#1F2A40] p-4 rounded shadow-md w-44 text-white z-50">
+              <div className="absolute right-0 top-16 bg-[#1F2A40] p-4 rounded shadow-md w-44 text-white z-50">
                 <div className="mb-2">Баланс: {formattedBalance} TON</div>
                 <button
                   className="w-full bg-red-500 hover:bg-red-600 text-white py-1 rounded"
