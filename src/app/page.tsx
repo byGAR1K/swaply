@@ -4,17 +4,91 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import gifts from "@/data/gifts.json";
 import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
+import { useRouter } from 'next/navigation'; // для Next 13+ App Router
+import { THEME, UIWallet } from '@tonconnect/ui';
 
+
+export const  HeaderWithBalance = () => {
+  const [tonConnectUI] = useTonConnectUI();
+  const account = tonConnectUI?.account;
+
+  const [balance, setBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!account) return;
+
+    const fetchBalance = async () => {
+      try {
+        const res = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${account.address}`);
+        const data = await res.json();
+        if (data.result) {
+          setBalance(parseInt(data.result) / 1_000_000_000); // переводим в TON
+        }
+      } catch (err) {
+        console.error("Ошибка при получении баланса:", err);
+        setBalance(null);
+      }
+    };
+
+    fetchBalance();
+  }, [account]);
+}
+export const SetTonTheme = () => {
+  const [tonConnectUI] = useTonConnectUI();
+
+  useEffect(() => {
+    if (!tonConnectUI) return;
+
+    tonConnectUI.uiOptions = {
+      uiPreferences: {
+        theme: THEME.DARK, // DARK или LIGHT
+      },
+    };
+  }, [tonConnectUI]);
+
+  return null; // Компонент ничего не рендерит
+};
 
 export default function Home() {
+   
+  // Вверху компонента Home:
+  const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
+
+  // Функция для показа уведомления на 3 секунды
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
+  };
   const [activeTab, setActiveTab] = useState("Telegram");
   const [activeGiftFilter, setActiveGiftFilter] = useState("Все");
   const [theme, setTheme] = useState<'dark' | 'light'>('dark'); // состояние темы
-  
-  const [tonConnectUI] = useTonConnectUI();
-  const [account, setAccount] = useState<string | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  
+
+  const [tonConnectUI] = useTonConnectUI();
+  const account = tonConnectUI?.account;
+  const connector = tonConnectUI?.connector;
+
+  const [balance, setBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (account) {
+      // Пример через API Toncenter (альтернатива Ton SDK)
+      fetch(`https://toncenter.com/api/v2/getAddressInformation?address=${account.address}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data?.result?.balance) {
+            setBalance(data.result.balance / 1_000_000_000);
+          }
+        })
+        .catch(() => setBalance(0));
+    } else {
+      setBalance(null);
+    }
+  }, [account]);
+
 
   // блокировка скролла при открытом модальном окне
   useEffect(() => {
@@ -202,7 +276,7 @@ export default function Home() {
         const filteredGifts = gifts.filter(
           (g) => activeGiftFilter === "Все" || g.type === activeGiftFilter
         );
-
+        
         return (
           <section className="max-w-6xl mx-auto py-8 px-4 flex flex-col gap-6">
             {/* Инфо-блок */}
@@ -387,7 +461,7 @@ export default function Home() {
         return null;
     }
   };
-
+  
   return (
     <main className="min-h-screen bg-[#1E293B] text-white font-sans flex flex-col">
       {/* Шапка */}
@@ -417,68 +491,113 @@ export default function Home() {
 
               {/* TON Connect кнопка справа */}
               <div className="ml-4">
+                <SetTonTheme />
                 <TonConnectButton />
               </div>
+              
             </div>
           </nav>
         </div>
       </header>
       {/* Модальное окно */}
       <AnimatePresence>
-        {selectedGift && (
+      {selectedGift && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          key={selectedGift.name} // 👈 уникальный ключ для модалки
+          className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30"
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="bg-[#2C3E50] rounded-3xl shadow-xl max-w-md w-full p-6 relative"
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              className="bg-[#2C3E50] rounded-3xl shadow-xl max-w-md w-full p-6 relative"
+            {/* Кнопка закрытия */}
+            <button
+              onClick={() => setSelectedGift(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl font-bold"
             >
-              {/* Кнопка закрытия */}
-              <button
-                onClick={() => setSelectedGift(null)}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl font-bold"
-              >
-                &times;
-              </button>
+              &times;
+            </button>
 
-              {/* Изображение подарка */}
+            {/* Изображение подарка */}
+            <img
+              src={selectedGift.image}
+              alt={selectedGift.name}
+              className="w-48 h-48 mx-auto rounded-lg mb-4 object-contain"
+            />
+
+            {/* Название и описание */}
+            <h3 className="text-2xl font-bold text-center mb-2">{selectedGift.name}</h3>
+            <p className="text-gray-300 text-center mb-4">{selectedGift.desc}</p>
+
+            {/* Цена в TON */}
+            <div className="bg-[#1E293B] flex items-center justify-center gap-2 p-3 rounded-2xl mb-4 border border-blue-400">
               <img
-                src={selectedGift.image}
-                alt={selectedGift.name}
-                className="w-48 h-48 mx-auto rounded-lg mb-4 object-contain"
+                src="https://ton.org/icons/custom/ton_logo.svg"
+                alt="toncoin"
+                className="w-6 h-6 object-contain"
               />
+              <span className="text-sm md:text-base font-bold text-white">
+                {selectedGift.price} TON
+              </span>
+            </div>
 
-              {/* Название и описание */}
-              <h3 className="text-2xl font-bold text-center mb-2">{selectedGift.name}</h3>
-              <p className="text-gray-300 text-center mb-4">{selectedGift.desc}</p>
+            {/* Кнопка Купить */}
+            <button
+              onClick={async () => {
+                if (!connector || !account) {
+                  return showNotification("error", "Сначала подключите кошелек!");
+                }
 
-              {/* Цена в TON */}
-              <div className="bg-[#1E293B] flex items-center justify-center gap-2 p-3 rounded-2xl mb-4 border border-blue-400">
-                <img
-                  src="https://ton.org/icons/custom/ton_logo.svg"
-                  alt="toncoin"
-                  className="w-6 h-6 object-contain"
-                />
-                <span className="text-sm md:text-base font-bold text-white">
-                  {selectedGift.price} TON
-                </span>
-              </div>
+                try {
+                  const valueNano = Number(selectedGift.price || 0) * 1_000_000_000;
 
-              {/* Кнопка Купить */}
-              <button
-                onClick={() => alert(`Вы купили ${selectedGift.name}!`)}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
-              >
-                Купить
-              </button>
-            </motion.div>
+                  const transaction = {
+                    validUntil: Math.floor(Date.now() / 1000) + 60,
+                    messages: [
+                      {
+                        address: "UQBQtv0HGH1jp9dXx3OcUoD2j-CW5NyMff7MlRBgVkuhP0Ki",
+                        amount: valueNano.toString(),
+                      }
+                    ]
+                  };
+
+                  const result = await connector.sendTransaction(transaction);
+                  console.log("Транзакция отправлена:", result);
+                  showNotification("success", `Вы успешно купили ${selectedGift.name}!`);
+                  setSelectedGift(null); // закрыть модалку
+                } catch (err) {
+                  console.error("Ошибка транзакции:", err);
+                  showNotification("error", "Ошибка при отправке транзакции");
+                }
+              }}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
+            >
+              Купить
+            </button>
+
           </motion.div>
-        )}
+        </motion.div>
+      )}
+      <AnimatePresence>
+      {notification && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className={`fixed top-6 left-1/2 -translate-x-1/2 px-6 py-4 rounded-xl shadow-lg text-white font-semibold z-50 ${
+            notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+          }`}
+        >
+          {notification.message}
+        </motion.div>
+      )}
+    </AnimatePresence>
+
       </AnimatePresence>         
       {/* Контент */}
       <div className="flex-grow">

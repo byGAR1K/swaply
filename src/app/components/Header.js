@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTonConnect } from '@tonconnect/ui-react';
 
 export default function Header() {
-  const { account, connect, disconnect } = useTonConnect();
+  const {account, connect, disconnect } = useTonConnect();
   const [menuOpen, setMenuOpen] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
 
