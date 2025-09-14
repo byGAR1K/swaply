@@ -1,58 +1,66 @@
 [
     {
-      "name": "🎁 Desk Calendar #171000",
-      "desc": "Эксклюзивная коллекция NFT Desk Calendars от Telegram.",
-      "type": "Популярные",
-      "image": "https://nft.fragment.com/collection/deskcalendar.webp",
-      "link": "https://fragment.com/gifts/deskcalendar"
-    },
-    {
-      "name": "Heart Locket #875",
-      "desc": "Эксклюзивный Heart Locket с уникальным дизайном.",
-      "type": "Редкие",
-      "image": "https://nft.fragment.com/gift/heartlocket-875.webp",
-      "link": "#"
+        "name": "🎁 Desk Calendar #171000",
+        "desc": "GIFT",
+        "type": "Популярные",
+        "image": "https://nft.fragment.com/collection/deskcalendar.webp",
+        "link": "https://fragment.com/gifts/deskcalendar",
+        "price": "3.2"
     },
     {
         "name": "Heart Locket #875",
-        "desc": "Эксклюзивный Heart Locket с уникальным дизайном.",
+        "desc": "GIFT",
         "type": "Редкие",
         "image": "https://nft.fragment.com/gift/heartlocket-875.webp",
-        "link": "#"
-    },
-    {
-        "name": "Plush Pepe #2658",
-        "desc": "An exclusive Plush Pepe with the appearance Cozy Galaxy on a Black background with Pegasus icons.",
-        "type": "Новые",
-        "image": "https://nft.fragment.com/gift/plushpepe-2658.webp",
-        "link": "https://tonviewer.com/EQCSTm3Xqo9f6GHdJh9Sd8dPv6bFLvqAWqIDtbFLvWEypaF0"
-    },
-    {
-        "name": "Vintage Cigar #7393",
-        "desc": "An exclusive Vintage Cigar with the appearance Psychonaut on a Black background with Rocket icons.",
-        "type": "Новые",
-        "image": "https://nft.fragment.com/gift/vintagecigar-7393.webp",
-        "link": "https://tonviewer.com/EQABP4LBytgt39jWZPeM6NpJp4uBNknay1SIpO0LiZvCIETi"
+        "link": "#",
+        "price": "4"
     },
     {
         "name": "Heart Locket #875",
-        "desc": "Эксклюзивный Heart Locket с уникальным дизайном.",
+        "desc": "GIFT",
         "type": "Редкие",
         "image": "https://nft.fragment.com/gift/heartlocket-875.webp",
-        "link": "#"
+        "link": "#",
+        "price": "11"
     },
     {
         "name": "Plush Pepe #2658",
-        "desc": "An exclusive Plush Pepe with the appearance Cozy Galaxy on a Black background with Pegasus icons.",
+        "desc": "GIFT",
         "type": "Новые",
         "image": "https://nft.fragment.com/gift/plushpepe-2658.webp",
-        "link": "https://tonviewer.com/EQCSTm3Xqo9f6GHdJh9Sd8dPv6bFLvqAWqIDtbFLvWEypaF0"
+        "link": "https://tonviewer.com/EQCSTm3Xqo9f6GHdJh9Sd8dPv6bFLvqAWqIDtbFLvWEypaF0",
+        "price": "33"
     },
     {
         "name": "Vintage Cigar #7393",
-        "desc": "An exclusive Vintage Cigar with the appearance Psychonaut on a Black background with Rocket icons.",
+        "desc": "GIFT",
         "type": "Новые",
         "image": "https://nft.fragment.com/gift/vintagecigar-7393.webp",
-        "link": "https://tonviewer.com/EQABP4LBytgt39jWZPeM6NpJp4uBNknay1SIpO0LiZvCIETi"
+        "link": "https://tonviewer.com/EQABP4LBytgt39jWZPeM6NpJp4uBNknay1SIpO0LiZvCIETi",
+        "price": "6.2"
+    },
+    {
+        "name": "Heart Locket #875",
+        "desc": "GIFT",
+        "type": "Редкие",
+        "image": "https://nft.fragment.com/gift/heartlocket-875.webp",
+        "link": "#",
+        "price": "65.4"
+    },
+    {
+        "name": "Plush Pepe #2658",
+        "desc": "GIFT",
+        "type": "Новые",
+        "image": "https://nft.fragment.com/gift/plushpepe-2658.webp",
+        "link": "https://tonviewer.com/EQCSTm3Xqo9f6GHdJh9Sd8dPv6bFLvqAWqIDtbFLvWEypaF0",
+        "price": "1555.5"
+    },
+    {
+        "name": "Vintage Cigar #7393",
+        "desc": "GIFT",
+        "type": "Новые",
+        "image": "https://nft.fragment.com/gift/vintagecigar-7393.webp",
+        "link": "https://tonviewer.com/EQABP4LBytgt39jWZPeM6NpJp4uBNknay1SIpO0LiZvCIETi",
+        "price": "3"
     }
   ]

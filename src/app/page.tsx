@@ -9,6 +9,18 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("Telegram");
   const [activeGiftFilter, setActiveGiftFilter] = useState("Все");
   const [theme, setTheme] = useState<'dark' | 'light'>('dark'); // состояние темы
+
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // блокировка скролла при открытом модальном окне
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [isModalOpen]);
   // Определяем тип подарка
   type Gift = {
     name: string;
@@ -16,7 +28,7 @@ export default function Home() {
     type: string;
     image: string;
     link?: string;
-    price?: number; // если у тебя есть цена
+    price?: string; // если у тебя есть цена
   };
 
   // Используем тип в useState
@@ -97,7 +109,7 @@ export default function Home() {
                     <label className="block mb-1 text-gray-300">Вставьте ссылку</label>
                     <input
                       type="text"
-                      placeholder="Ссылка на ваш аккаунт"
+                      placeholder="Enter Telegram username"
                       className="w-full p-3 rounded-lg bg-[#1E293B] border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                   </div>
@@ -113,7 +125,7 @@ export default function Home() {
                     <label className="block mb-1 text-gray-300">Сколько звезд купить</label>
                     <input
                       type="number"
-                      placeholder="Количество"
+                      placeholder="Введите сумму (50 - 20 000)"
                       className="w-full p-3 rounded-lg bg-[#1E293B] border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                   </div>
@@ -188,68 +200,184 @@ export default function Home() {
           (g) => activeGiftFilter === "Все" || g.type === activeGiftFilter
         );
 
-        return (  
-          <section className="max-w-6xl mx-auto py-8 px-4 flex flex-col md:flex-row items-start gap-4 md:gap-6">
-            {/* Блок фильтров */}
-            <div className="w-full md:w-1/4 bg-[#2C3E50] p-3 md:p-6 rounded-3xl shadow-lg flex flex-row md:flex-col gap-2 md:gap-3 overflow-x-auto scrollbar-hide h-fit">
-              {giftFilters.map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setActiveGiftFilter(filter)}
-                  className={`px-3 py-2 md:px-4 md:py-2 rounded-lg font-semibold flex-shrink-0 transition text-sm md:text-base ${
-                    activeGiftFilter === filter
-                      ? "bg-blue-500 text-white"
-                      : "bg-[#1E293B] text-gray-300 hover:bg-blue-600 hover:text-white"
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
+        return (
+          <section className="max-w-6xl mx-auto py-8 px-4 flex flex-col gap-6">
+            {/* Инфо-блок */}
+            <div className="bg-[#2C3E50] p-6 rounded-3xl shadow-lg text-center md:text-left">
+              <h2 className="text-3xl font-bold mb-2">Telegram gifts</h2>
+              <p className="text-gray-300 mb-3">
+                 Gifts — это твоя витрина уникальных Telegram-подарков. Собирай, храни и продавай.
+              </p>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="text-sm text-blue-400 hover:underline"
+              >
+                Как добавить новые подарки?
+              </button>
             </div>
 
-            {/* Блок сетки подарков */}
-            <div className="w-full md:w-3/4 bg-[#2C3E50] p-3 md:p-6 rounded-3xl shadow-lg">
-              {filteredGifts.length === 0 ? (
-                <p className="text-gray-400 text-center py-10 text-lg">
-                  😢 Информация про подарки отсутствует
-                </p>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                  {filteredGifts.map((gift, i) => (
-                    <div
-                      key={i}
-                      onClick={() => setSelectedGift(gift)} // открытие модалки
-                      className="bg-[#1E293B] p-4 md:p-6 rounded-2xl shadow-md flex flex-col items-center justify-center hover:scale-105 transition cursor-pointer"
-                    >
-                      <img
-                        src={gift.image}
-                        alt={gift.name}
-                        className="w-32 h-32 md:w-40 md:h-40 object-contain rounded-lg mb-3"
-                      />
-                      <h3 className="text-sm md:text-base font-semibold text-center mb-2">
-                        {gift.name}
-                      </h3>
-                      <p className="text-gray-300 text-xs md:text-sm text-center mb-2">
-                        {gift.desc}
-                      </p>
-                      {gift.link && (
+            <div className="flex flex-col md:flex-row items-start gap-4 md:gap-6">
+              {/* Блок фильтров */}
+              <div className="w-full md:w-1/4 bg-[#2C3E50] p-3 md:p-6 rounded-3xl shadow-lg flex flex-row md:flex-col gap-2 md:gap-3 overflow-x-auto scrollbar-hide h-fit">
+                {giftFilters.map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setActiveGiftFilter(filter)}
+                    className={`px-3 py-2 md:px-4 md:py-2 rounded-lg font-semibold flex-shrink-0 transition text-sm md:text-base ${
+                      activeGiftFilter === filter
+                        ? "bg-blue-500 text-white"
+                        : "bg-[#1E293B] text-gray-300 hover:bg-blue-600 hover:text-white"
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+
+              {/* Блок сетки подарков */}
+              <div className="w-full md:w-3/4 bg-[#2C3E50] p-3 md:p-6 rounded-3xl shadow-lg">
+                {filteredGifts.length === 0 ? (
+                  <p className="text-gray-400 text-center py-10 text-lg">
+                    😢 Информация про подарки отсутствует
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    {filteredGifts.map((gift, i) => (
+                      <div
+                        key={i}
+                        onClick={() => setSelectedGift(gift)} // открытие модалки для подарка
+                        className="relative bg-[#1E293B] p-4 md:p-6 rounded-2xl shadow-md flex flex-col items-center justify-center hover:scale-105 transition cursor-pointer"
+                      >
+                        {/* Badge */}
+                        {gift.type && (
+                          <span
+                            className={`absolute top-3 left-3 px-2 py-1 text-xs font-bold rounded-full text-white ${
+                              gift.type === "Новые" ? "bg-green-500" :
+                              gift.type === "Популярные" ? "bg-purple-500" :
+                              gift.type === "Редкие" ? "bg-yellow-500" :
+                              gift.type === "Популярные" ? "bg-blue-400" :
+
+                              "bg-gray-500"
+                            }`}
+                          >
+                            {gift.type}
+                          </span>
+                        )}
+
+                        <img
+                          src={gift.image}
+                          alt={gift.name}
+                          className="w-32 h-32 md:w-40 md:h-40 object-contain rounded-lg mb-3"
+                        />
+                        <h3 className="text-sm md:text-base font-semibold text-center mb-2">
+                          {gift.name}
+                        </h3>
+                        <p className="text-gray-300 text-xs md:text-sm text-center mb-2">
+                          {gift.desc}
+                        </p>
+                        {gift.link && (
+                          <a
+                            href={gift.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:underline text-xs md:text-sm"
+                          >
+                            Подробнее
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Модалка */}
+            {isModalOpen && (
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+                <div className="bg-[#2C3E50] text-white p-6 md:p-8 rounded-3xl shadow-xl w-full max-w-lg relative">
+                  {/* Кнопка закрыть */}
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="absolute top-4 right-4 text-gray-300 hover:text-white text-2xl"
+                  >
+                    ✖
+                  </button>
+
+                  {/* Заголовок */}
+                  <div className="flex flex-col items-center mb-6">
+                    <div className="w-16 h-16 bg-[#1E293B] rounded-full flex items-center justify-center mb-3">
+                    <img
+                        src="https://media.tenor.com/EsfiU8pyvMsAAAAi/utya-utya-duck.gif"
+                        alt="utya"
+                        className="w-48 h-48 mx-auto rounded-lg mb-4 object-contain"
+                    />
+                    </div>
+                    <h2 className="text-2xl font-bold">Как добавить подарки</h2>
+                    <p className="text-gray-300 text-sm mt-2 text-center">
+                      Отправляйте свои NFT-подарки и сразу выставляйте их на продажу.
+                    </p>
+                  </div>
+
+                  {/* Шаги */}
+                  <div className="space-y-4">
+                    <div className="bg-[#1E293B] p-4 rounded-xl">
+                      <h3 className="font-semibold text-blue-400">ШАГ 1</h3>
+                      <p className="text-sm text-gray-300 mt-1">
+                        Отправьте любое сообщение боту{" "}
                         <a
-                          href={gift.link}
+                          href="@"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-400 hover:underline text-xs md:text-sm"
+                          className="text-blue-400 hover:underline"
                         >
-                          Подробнее
+                          @none
                         </a>
-                      )}
+                      </p>
                     </div>
-                  ))}
+
+                    <div className="bg-[#1E293B] p-4 rounded-xl">
+                      <h3 className="font-semibold text-blue-400">ШАГ 2</h3>
+                      <p className="text-sm text-gray-300 mt-1">
+                        Перейдите в профиль{" "}
+                        <a
+                          href="@"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:underline"
+                        >
+                          @none
+                        </a>{" "}
+                        и нажмите «Send Gift».
+                      </p>
+                    </div>
+
+                    <div className="bg-[#1E293B] p-4 rounded-xl">
+                      <h3 className="font-semibold text-blue-400">ШАГ 3</h3>
+                      <p className="text-sm text-gray-300 mt-1">
+                        Выберите подарок и купите его для{" "}
+                        <span className="text-blue-400">@none</span>.
+                      </p>
+                    </div>
+
+                    <div className="bg-[#1E293B] p-4 rounded-xl">
+                      <h3 className="font-semibold text-blue-400">ШАГ 4</h3>
+                      <p className="text-sm text-gray-300 mt-1">
+                        Найдите свой подарок в профиле и выставьте его на продажу.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Кнопка закрыть */}
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="mt-6 w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold text-white"
+                  >
+                    Понятно, закрыть
+                  </button>
                 </div>
-              )}
-            </div>
-
+              </div>
+            )}
           </section>
-
         );
 
       default:
@@ -319,13 +447,17 @@ export default function Home() {
               <h3 className="text-2xl font-bold text-center mb-2">{selectedGift.name}</h3>
               <p className="text-gray-300 text-center mb-4">{selectedGift.desc}</p>
 
-              {/* Цена */}
-              {selectedGift.price && (
-                <div className="flex items-center justify-center gap-2 text-lg font-semibold text-blue-400 mb-4">
-                  <img src="/ton-icon.png" alt="TON" className="w-5 h-5" />
+              {/* Цена в TON */}
+              <div className="bg-[#1E293B] flex items-center justify-center gap-2 p-3 rounded-2xl mb-4 border border-blue-400">
+                <img
+                  src="https://ton.org/icons/custom/ton_logo.svg"
+                  alt="toncoin"
+                  className="w-6 h-6 object-contain"
+                />
+                <span className="text-sm md:text-base font-bold text-white">
                   {selectedGift.price} TON
-                </div>
-              )}
+                </span>
+              </div>
 
               {/* Кнопка Купить */}
               <button
