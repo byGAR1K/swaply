@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import gifts from "@/data/gifts.json";
 import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
-import { useRouter } from 'next/navigation'; // для Next 13+ App Router
 import { THEME, UIWallet } from '@tonconnect/ui';
 
 
@@ -50,7 +49,11 @@ export const SetTonTheme = () => {
 };
 
 export default function Home() {
-   
+  const [isOpen, setIsOpen] = useState(false);
+  
+  
+  const [isProcessing, setIsProcessing] = useState(false); // Процесс покупки подарка {КУПИТЬ, ОБРАБОТКА, ОТМЕНА ТРАНЗАКЦИИ, НЕДОСТАТОЧНО СРЕДСТВ}
+
   // Вверху компонента Home:
   const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
 
@@ -158,6 +161,7 @@ export default function Home() {
               </h2>
             </section>
 
+            {/* Блок с уткой */}
             <section className="max-w-5xl mx-auto bg-[#2C3E50] border border-gray-600 rounded-3xl shadow-lg p-6 mt-5 mb-12 flex flex-col md:flex-row items-center gap-6">
               <div className="flex-shrink-0">
                 <img
@@ -172,7 +176,10 @@ export default function Home() {
                   Вы можете быстро покупать звезды, управлять подарками и оплачивать услуги безопасно.
                   Всё через Telegram, без лишней волокиты и KYC.
                 </p>
-                <button className="px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-semibold transition">
+                <button
+                  onClick={() => setIsOpen(true)}
+                  className="px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-lg font-semibold transition"
+                >
                   Начать
                 </button>
               </div>
@@ -447,8 +454,7 @@ export default function Home() {
                   {/* Кнопка закрыть */}
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="mt-6 w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold text-white"
-                  >
+                    className="mt-6 w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold text-white">
                     Понятно, закрыть
                   </button>
                 </div>
@@ -499,6 +505,89 @@ export default function Home() {
           </nav>
         </div>
       </header>
+      {/* Модальное окно НАЧАТЬ */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="fixed inset-0 flex items-center justify-center bg-black/70 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-[#2C3E50] border border-gray-600 rounded-2xl shadow-xl p-6 max-w-lg w-full relative text-white"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+            >
+              {/* Кнопка закрытия */}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl"
+              >
+                ✖
+              </button>
+
+              <h2 className="text-2xl font-bold mb-6 text-center">
+                🚀 Добро пожаловать в Swaply
+              </h2>
+
+              {/* Шаги в карточках */}
+              <div className="space-y-4">
+                <div className="bg-[#1E293B] p-4 rounded-xl shadow-md">
+                  <h3 className="font-semibold text-blue-400">ШАГ 1</h3>
+                  <p className="text-sm text-gray-300 mt-1 font-bold">
+                    Авторизуйтесь через Telegram
+                  </p>
+                </div>
+
+                <div className="bg-[#1E293B] p-4 rounded-xl shadow-md">
+                  <h3 className="font-semibold text-blue-400">ШАГ 2</h3>
+                  <p className="text-sm text-gray-300 mt-1 font-bold">
+                    Пополните баланс или подключите Ton Wallet
+                  </p>
+                </div>
+
+                <div className="bg-[#1E293B] p-4 rounded-xl shadow-md">
+                  <h3 className="font-semibold text-blue-400">ШАГ 3</h3>
+                  <p className="text-sm text-gray-300 mt-1 font-bold">
+                    Выбирайте подарки и услуги прямо на сайте
+                  </p>
+                </div>
+
+                <div className="bg-[#1E293B] p-4 rounded-xl shadow-md">
+                  <h3 className="font-semibold text-blue-400">ШАГ 4</h3>
+                  <p className="text-sm text-gray-300 mt-1 font-bold">
+                    Оплачивайте в пару кликов без KYC
+                  </p>
+                </div>
+
+                <div className="bg-[#1E293B] p-4 rounded-xl shadow-md">
+                  <h3 className="font-semibold text-blue-400">ШАГ 5</h3>
+                  <p className="text-sm text-gray-300 mt-1 font-bold">
+                    Подписывайте транзакцию в сети TON и получайте услугу
+                  </p>
+                </div>
+              </div>
+
+              {/* Кнопка закрыть */}
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="px-6 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg font-semibold"
+                >
+                  Понятно
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+
+      
+      
+      
       {/* Модальное окно */}
       <AnimatePresence>
       {selectedGift && (
@@ -548,12 +637,14 @@ export default function Home() {
 
             {/* Кнопка Купить */}
             <button
+              disabled={isProcessing} // 🚫 блокировка во время выполнения
               onClick={async () => {
                 if (!connector || !account) {
                   return showNotification("error", "Сначала подключите кошелек!");
                 }
 
                 try {
+                  setIsProcessing(true); // 🚀 блокируем кнопку
                   const valueNano = Number(selectedGift.price || 0) * 1_000_000_000;
 
                   const transaction = {
@@ -566,18 +657,27 @@ export default function Home() {
                     ]
                   };
 
+                  // уведомление сразу
+                  showNotification("success", `Транзакция на ${selectedGift.price} TON отправлена в кошелек`);
+
                   const result = await connector.sendTransaction(transaction);
                   console.log("Транзакция отправлена:", result);
+
                   showNotification("success", `Вы успешно купили ${selectedGift.name}!`);
                   setSelectedGift(null); // закрыть модалку
                 } catch (err) {
                   console.error("Ошибка транзакции:", err);
                   showNotification("error", "Ошибка при отправке транзакции");
+                } finally {
+                  setIsProcessing(false); // ✅ разблокировка кнопки
                 }
               }}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
+              className={`w-full font-semibold py-3 rounded-lg transition 
+                ${isProcessing 
+                  ? "bg-gray-500 cursor-not-allowed" 
+                  : "bg-blue-500 hover:bg-blue-600 text-white"}`}
             >
-              Купить
+              {isProcessing ? "Обработка..." : "Купить"}
             </button>
 
           </motion.div>
