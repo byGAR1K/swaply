@@ -7,6 +7,7 @@ import { TonConnectButton, useTonConnectUI } from '@tonconnect/ui-react';
 import { THEME, UIWallet } from '@tonconnect/ui';
 
 
+
 export const  HeaderWithBalance = () => {
   const [tonConnectUI] = useTonConnectUI();
   const account = tonConnectUI?.account;
@@ -136,6 +137,113 @@ export default function Home() {
     };
   }, [selectedGift]);
   
+
+
+  const [username, setUsername] = useState("");
+  const [userInfo, setUserInfo] = useState<{
+    avatar: string | null;
+    name: string;
+    username: string; // <-- поле с логином пользователя
+  } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<string | null>(null);
+
+  // Убираем @ и "Contact " из имени
+  const cleanUsername = (name: string) => {
+    return name.replace(/^@/, "").replace(/^Contact\s*/, "");
+  };
+
+  // Проверка валидности Telegram username
+  const isValidTelegramUsername = (username: string) => {
+    return /^[a-zA-Z_][a-zA-Z0-9_]{4,31}$/.test(username);
+  };
+
+  useEffect(() => {
+    if (!username) {
+      setUserInfo(null);
+      setError(null);
+      return;
+    }
+
+    if (!isValidTelegramUsername(username)) {
+      setUserInfo(null);
+      setError("Некорректный ник Telegram");
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const res = await fetch(`/api/get_user?username=${username}`);
+        const data = await res.json();
+
+        if (!data.error) {
+          // Подставляем чистый логин
+          setUserInfo({
+            ...data,
+            username: cleanUsername(data.username || data.name), 
+          });
+          setError(null);
+        } else {
+          setUserInfo(null);
+          setError("Пользователь не найден");
+        }
+      } catch {
+        setUserInfo(null);
+        setError("Ошибка сервера");
+      }
+
+      setLoading(false);
+    }, 700);
+
+    return () => clearTimeout(timer);
+  }, [username]);
+
+
+
+
+  const [stars, setStars] = useState<number | "">("");
+  const [tonRateUsd, setTonRateUsd] = useState<number | null>(null);
+  const starsToTonRate = 0.0056; // 1 Star ≈ 0.0056 TON
+
+  // Загружаем курс TON → USD
+  useEffect(() => {
+    const fetchRate = async () => {
+      try {
+        const res = await fetch(
+          "https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd"
+        );
+        const data = await res.json();
+        setTonRateUsd(data["the-open-network"].usd);
+      } catch {
+        setTonRateUsd(null);
+      }
+    };
+
+    fetchRate();
+    const interval = setInterval(fetchRate, 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Конвертация
+  const starsToTon = stars ? Number(stars) * starsToTonRate : 0;
+  const starsToUsd = tonRateUsd ? starsToTon * tonRateUsd : 0;
+
+  // Валидация
+  useEffect(() => {
+    if (!stars) {
+      setErrors(null); //Error  name new
+      return;
+    }
+    if (Number(stars) < 50) setErrors("Ошибка меньше 50");
+    else if (Number(stars) > 20000) setErrors("Ошибка  больше 20000");
+    else setErrors(null);
+  }, [stars]);
+
+
   // Включение класса на body при смене темы
   useEffect(() => {
     document.body.className = theme === 'dark' 
@@ -150,19 +258,17 @@ export default function Home() {
       case "Telegram":
         return (
           <>
-            <section className="max-w-5xl mx-auto py-12 text-left px-6">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                Получите услуги{" "}
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-blue-300 to-blue-500 animate-gradient-x">
-                  Telegram
-                </span>{" "}
-                быстро -{" "}
-                <span className="inline-block text-center w-full md:w-auto">KYC</span>
-              </h2>
-            </section>
+            <section className="max-w-5xl mx-auto py-12 px-6">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-left">
+              Получите услуги{" "}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-blue-300 to-blue-500 animate-gradient-x">
+                Telegram
+              </span>{" "}
+              быстро - <span className="inline-block">KYC</span>
+            </h2>
 
             {/* Блок с уткой */}
-            <section className="max-w-5xl mx-auto bg-[#2C3E50] border border-gray-600 rounded-3xl shadow-lg p-6 mt-5 mb-12 flex flex-col md:flex-row items-center gap-6">
+            <section className="max-w-5xl mx-auto bg-[#2C3E50] border border-gray-600 rounded-3xl shadow-lg p-12 mt-5 mb-12 flex flex-col md:flex-row items-center gap-6">
               <div className="flex-shrink-0">
                 <img
                   src="https://media.tenor.com/-UVdGp9pWrAAAAAi/utya-telegram.gif"
@@ -173,8 +279,7 @@ export default function Home() {
               <div className="flex-1 space-y-4 text-center md:text-left">
                 <h3 className="text-3xl font-bold">Крутые функции Swaply</h3>
                 <p className="text-gray-300 text-lg">
-                  Вы можете быстро покупать звезды, управлять подарками и оплачивать услуги безопасно.
-                  Всё через Telegram, без лишней волокиты и KYC.
+                  Вы можете быстро покупать звезды, управлять подарками и оплачивать услуги безопасно. Всё через Telegram, без лишней волокиты и KYC.
                 </p>
                 <button
                   onClick={() => setIsOpen(true)}
@@ -185,34 +290,105 @@ export default function Home() {
               </div>
             </section>
 
+            {/* Купить звезды */}
             <section className="max-w-5xl mx-auto bg-[#2C3E50] shadow-xl rounded-3xl p-8">
               <h3 className="text-2xl font-semibold mb-6 text-center">Купить звезды ⭐</h3>
-              <div className="flex flex-col md:flex-row items-center gap-8">
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
                 <form className="flex-1 space-y-4 w-full">
-                  <div>
-                    <label className="block mb-1 text-gray-300">Вставьте ссылку</label>
+                  <div className="relative">
+                    <label className="block mb-1 text-gray-300">CHOOSE RECIPIENT</label>
+
                     <input
                       type="text"
                       placeholder="Enter Telegram username"
-                      className="w-full p-3 rounded-lg bg-[#1E293B] border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      value={userInfo ? userInfo.username : username}
+                      onChange={(e) => {
+                        setUsername(e.target.value);
+                        setUserInfo(null);
+                        setError(null);
+                      }}
+                      disabled={!!userInfo}
+                      className={`w-full pl-12 pr-10 py-3 rounded-lg bg-[#1E293B] border-none text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                        error ? "focus:ring-red-400" : "focus:ring-blue-400"
+                      }`}
                     />
+
+                    {/* Аватар слева */}
+                    {userInfo?.avatar && (
+                      <img
+                        src={userInfo.avatar}
+                        alt="Avatar"
+                        className="w-7 h-7 rounded-full absolute left-3 top-12 -translate-y-1/2"
+                      />
+                    )}
+
+                    {/* Крестик справа */}
+                    {(username || userInfo) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUsername("");
+                          setUserInfo(null);
+                          setError(null);
+                        }}
+                        className="absolute right-3 top-13 -translate-y-1/2 text-gray-400 hover:text-white"
+                      >
+                        ✕
+                      </button>
+                    )}
                   </div>
+
+                  {loading && <p className="text-gray-300">Загрузка...</p>}
+                  {error && <p className="text-red-400">{error}</p>}
+
                   <div>
-                    <label className="block mb-1 text-gray-300">Выберите способ оплаты</label>
+                    <label className="block mb-1 text-gray-300">SELECT PAYMENT METHOD</label>
                     <select className="w-full p-3 rounded-lg bg-[#1E293B] border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
-                      <option>Card</option>
-                      <option>PayPal</option>
-                      <option>Crypto</option>
+                      <option>Ton</option>
                     </select>
                   </div>
+
                   <div>
-                    <label className="block mb-1 text-gray-300">Сколько звезд купить</label>
+                  <label className="block mb-1 text-gray-300">CHOOSE THE NUMBER OF TELEGRAM STARS</label>
+                  <div className="relative">
                     <input
                       type="number"
-                      placeholder="Введите сумму (50 - 20 000)"
-                      className="w-full p-3 rounded-lg bg-[#1E293B] border-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      placeholder="Enter the amount (50 - 20,000)"
+                      value={stars}
+                      onChange={(e) => {
+                        const value = e.target.value ? Number(e.target.value) : "";
+                        setStars(value);
+
+                        if (value !== "") {
+                          if (value < 50) {
+                            setErrors("Минимум 50 ⭐");
+                          } else if (value > 20000) {
+                            setErrors("Максимум 20 000 ⭐");
+                          } else {
+                            setErrors(null);
+                          }
+                        } else {
+                          setErrors(null);
+                        }
+                      }}
+                      className={`w-full p-3 rounded-lg bg-[#1E293B] border ${
+                        errors ? "border-red-500 focus:ring-red-400" : "border-none focus:ring-blue-400"
+                      } text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 
+                      [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                     />
+
+                    {/* Справа конвертация */}
+                    {stars && !errors && (
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                        ≈ {starsToTon.toFixed(2)} TON {tonRateUsd && `(${starsToUsd.toFixed(2)}$)`}
+                      </span>
+                    )}
                   </div>
+
+                  {/* Ошибка ниже инпута */}
+                  {errors && <p className="text-red-400 text-sm mt-1">{errors}</p>}
+                </div>
+
                   <button
                     type="submit"
                     className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
@@ -220,6 +396,7 @@ export default function Home() {
                     Купить ⭐
                   </button>
                 </form>
+
                 <div className="flex-1 w-full flex justify-center">
                   <img
                     src="https://media.tenor.com/XeoIkKG0G2kAAAAi/%D1%83%D1%82%D0%B5%D0%BD%D0%BE%D0%BA.gif"
@@ -229,47 +406,86 @@ export default function Home() {
                 </div>
               </div>
             </section>
+          </section>
+
           </>
         );
+        
+        case "Premium":
+          return (
+            <section className="max-w-5xl mx-auto bg-[#2C3E50] rounded-3xl shadow-lg p-6 mt-5 mb-12">
+              <h2 className="text-3xl font-bold text-center mb-6">Premium услуги 🚀</h2>
+              <form className="space-y-4 max-w-lg mx-auto">
+                <div className="relative">
+                  <label className="block mb-1 text-gray-300">Ник Telegram</label>
+                  <input
+                    type="text"
+                    placeholder="@username Telegram"
+                    value={userInfo ? userInfo.username : username}
+                    onChange={(e) => {
+                      setUsername(e.target.value);
+                      setUserInfo(null);
+                      setError(null);
+                    }}
+                    disabled={!!userInfo}
+                    className={`w-full pl-12 pr-10 py-3 rounded-lg bg-[#1E293B] border-none text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                      error ? "focus:ring-red-400" : "focus:ring-blue-400"
+                    }`}
+                  />
+                  {/* Аватар слева */}
+                  {userInfo?.avatar && (
+                    <img
+                      src={userInfo.avatar}
+                      alt="Avatar"
+                      className="w-7 h-7 rounded-full absolute left-3 top-12 -translate-y-1/2"
+                    />
+                  )}
+                  {/* Крестик справа для очистки */}
+                  {(username || userInfo) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUsername("");
+                        setUserInfo(null);
+                        setError(null);
+                      }}
+                      className="absolute right-3 top-13 -translate-y-1/2 text-gray-400 hover:text-white"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                {loading && <p className="text-gray-300">Загрузка...</p>}
+                {error && <p className="text-red-400">{error}</p>}
+        
+                <div>
+                  <label className="block mb-1 text-gray-300">Срок подписки</label>
+                  <select className="w-full p-3 rounded-lg bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <option value="3">3 месяца</option>
+                    <option value="6">6 месяцев</option>
+                    <option value="12">12 месяцев</option>
+                  </select>
+                </div>
 
-      case "Premium":
-        return (
-          <section className="max-w-5xl mx-auto bg-[#2C3E50] rounded-3xl shadow-lg p-6 mt-5 mb-12">
-            <h2 className="text-3xl font-bold text-center mb-6">Premium услуги 🚀</h2>
-            <form className="space-y-4 max-w-lg mx-auto">
-              <div>
-                <label className="block mb-1 text-gray-300">Ник Telegram</label>
-                <input
-                  type="text"
-                  placeholder="@username"
-                  className="w-full p-3 rounded-lg bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-              <div>
-                <label className="block mb-1 text-gray-300">Срок подписки (месяцы)</label>
-                <input
-                  type="number"
-                  placeholder="1"
-                  className="w-full p-3 rounded-lg bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-              <div>
-                <label className="block mb-1 text-gray-300">Способ оплаты</label>
-                <select className="w-full p-3 rounded-lg bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-blue-400">
-                  <option>Stars</option>
-                  <option>Crypto</option>
-                  <option>Card</option>
-                </select>
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
-              >
-                Оплатить Premium
-              </button>
-            </form>
-          </section>
-        );
+        
+                <div>
+                  <label className="block mb-1 text-gray-300">Способ оплаты</label>
+                  <select className="w-full p-3 rounded-lg bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <option>Stars</option>
+                    <option>Crypto</option>
+                    <option>Card</option>
+                  </select>
+                </div>
+        
+                <button
+                  type="submit"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition"
+                >
+                  Оплатить Premium
+                </button>
+              </form>
+            </section>
+          );
 
       case "Stars":
         return (
