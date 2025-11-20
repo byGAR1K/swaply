@@ -49,10 +49,11 @@ export const SetTonTheme = () => {
   return null; // Компонент ничего не рендерит
 };
 
+
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   
-  
+
   const [isProcessing, setIsProcessing] = useState(false); // Процесс покупки подарка {КУПИТЬ, ОБРАБОТКА, ОТМЕНА ТРАНЗАКЦИИ, НЕДОСТАТОЧНО СРЕДСТВ}
 
   // Вверху компонента Home:
@@ -156,7 +157,7 @@ export default function Home() {
 
   // Проверка валидности Telegram username
   const isValidTelegramUsername = (username: string) => {
-    return /^[a-zA-Z_][a-zA-Z0-9_]{4,31}$/.test(username);
+    return /^[a-zA-Z_][a-zA-Z0-9_]{3,31}$/.test(username);
   };
 
   useEffect(() => {
@@ -253,6 +254,7 @@ export default function Home() {
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
+  const [menuOpen, setMenuOpen] = useState(false);
   const renderTabContent = () => {
     switch (activeTab) {
       case "Telegram":
@@ -296,7 +298,7 @@ export default function Home() {
               <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
                 <form className="flex-1 space-y-4 w-full">
                   <div className="relative">
-                    <label className="block mb-1 text-gray-300">CHOOSE RECIPIENT</label>
+                    <label className="block mb-1 text-gray-300">Выберите получателя</label>
 
                     <input
                       type="text"
@@ -342,14 +344,15 @@ export default function Home() {
                   {error && <p className="text-red-400">{error}</p>}
 
                   <div>
-                    <label className="block mb-1 text-gray-300">SELECT PAYMENT METHOD</label>
+                    <label className="block mb-1 text-gray-300">Выберите способ оплаты</label>
                     <select className="w-full p-3 rounded-lg bg-[#1E293B] border-none focus:outline-none focus:ring-2 focus:ring-blue-400">
                       <option>Ton</option>
+                      <option>Карта UAH</option>
                     </select>
                   </div>
 
                   <div>
-                  <label className="block mb-1 text-gray-300">CHOOSE THE NUMBER OF TELEGRAM STARS</label>
+                  <label className="block mb-1 text-gray-300">Выберите кол-во звезд для покупки</label>
                   <div className="relative">
                     <input
                       type="number"
@@ -686,41 +689,69 @@ export default function Home() {
   
   return (
     <main className="min-h-screen bg-[#1E293B] text-white font-sans flex flex-col">
-      {/* Шапка */}
       <header className="bg-[#2C3E50] shadow-md py-4">
-        <div className="flex items-center max-w-5xl mx-6 md:mx-auto justify-between">
+        <div className="max-w-6xl mx-6 md:mx-auto flex items-center justify-between">
+
+          {/* ЛОГО слева */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <h1 className="text-xl font-bold">🚀 SWAPLY</h1>
           </div>
 
-          <nav className="overflow-x-auto scrollbar-hide ml-6 flex-1">
-            <div className="flex items-center justify-between">
-              <div className="flex space-x-6 px-4 md:justify-center">
+          {/* ПК МЕНЮ — центр, видимо только на md+ */}
+          <nav className="hidden md:flex gap-8">
+            {["Telegram", "Premium", "Stars", "Gifts"].map((tab) => (
+              <span
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`cursor-pointer whitespace-nowrap pb-2 transition border-b-2 font-bold ${
+                  activeTab === tab
+                    ? "border-blue-500 text-blue-400" // более насыщенный синий
+                    : "border-transparent text-gray-200 hover:text-blue-300" // серый светлее + hover яркий
+                }`}
+              >
+                {tab}
+              </span>
+            ))}
+          </nav>
+
+          {/* CONNECT WALLET справа */}
+          <div className="flex items-center gap-3">
+            <SetTonTheme />
+            <TonConnectButton />
+            
+            {/* Бургер – только на мобилке */}
+            <button
+              className="text-white text-2xl md:hidden"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              ☰
+            </button>
+          </div>
+        </div>
+
+        {/* Мобильное меню */}
+          {menuOpen && (
+            <div className="md:hidden bg-[#1E293B] border-t border-gray-600 mt-3 py-4 shadow-lg">
+              <div className="flex flex-col items-center space-y-4">
                 {["Telegram", "Premium", "Stars", "Gifts"].map((tab) => (
                   <span
                     key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`cursor-pointer whitespace-nowrap pb-2 transition border-b-2 ${
-                      activeTab === tab
-                        ? "border-blue-400 text-white"
-                        : "border-transparent text-gray-300 hover:text-white"
+                    onClick={() => {
+                      setActiveTab(tab);
+                      setMenuOpen(false);
+                    }}
+                    className={`cursor-pointer text-lg font-bold transition ${
+                      activeTab === tab ? "text-blue-400" : "text-gray-200 hover:text-blue-300"
                     }`}
                   >
                     {tab}
                   </span>
                 ))}
               </div>
-
-              {/* TON Connect кнопка справа */}
-              <div className="ml-4">
-                <SetTonTheme />
-                <TonConnectButton />
-              </div>
-              
             </div>
-          </nav>
-        </div>
+          )}
       </header>
+  
       {/* Модальное окно НАЧАТЬ */}
       <AnimatePresence>
         {isOpen && (
@@ -802,7 +833,7 @@ export default function Home() {
 
 
       
-      
+     
       
       {/* Модальное окно */}
       <AnimatePresence>

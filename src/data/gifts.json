@@ -13,7 +13,7 @@
         "type": "Редкие",
         "image": "https://nft.fragment.com/gift/heartlocket-875.webp",
         "link": "#",
-        "price": "4"
+        "price": "0.1"
     },
     {
         "name": "Heart Locket #875",
@@ -56,6 +56,14 @@
         "price": "1555.5"
     },
     {
+        "name": "Star Notepad #59852",
+        "desc": "GIFT",
+        "type": "Новые",
+        "image": "https://nft.fragment.com/gift/starnotepad-9605.tgs",
+        "link": "https://t.me/nft/StarNotepad-59852",
+        "price": "2"
+    },
+    {
         "name": "Vintage Cigar #7393",
         "desc": "GIFT",
         "type": "Новые",
@@ -63,4 +71,5 @@
         "link": "https://tonviewer.com/EQABP4LBytgt39jWZPeM6NpJp4uBNknay1SIpO0LiZvCIETi",
         "price": "3"
     }
+    
   ]
